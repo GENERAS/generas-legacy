@@ -1,0 +1,31 @@
+/* stylelint-disable */
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-slate-900 to-slate-800 text-white min-h-screen;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-slate-800/50 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition flex items-center gap-2;
+  }
+  
+  .btn-coffee {
+    @apply bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-lg transition flex items-center gap-2;
+  }
+  
+  .stat-card {
+    @apply bg-slate-800/30 rounded-xl p-4 text-center hover:bg-slate-700/30 transition;
+  }
+  
+  .timeline-dot {
+    @apply absolute -left-2 top-2 w-4 h-4 rounded-full bg-amber-500 border-4 border-slate-800;
+  }
+}
+/* stylelint-enable */
