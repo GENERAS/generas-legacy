@@ -174,10 +174,36 @@ export default function HomePage() {
       </div>
 
       {/* Database Status */}
-      <div className="bg-slate-800/30 rounded-xl p-4 text-center border border-green-500/30">
-        <p className="text-green-400 text-sm">✅ Database Connected | 36 Tables Ready | {stats.academic_levels} Academic Levels, {stats.projects} Projects, {stats.trades} Trades</p>
-        <p className="text-gray-500 text-xs mt-1">Skills Matrix shows your current skills with progress bars</p>
-      </div>
+     <div className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-xl p-8 text-center border border-amber-500/30 my-8">
+  <h3 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
+    Let's Work Together
+  </h3>
+  <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+    Need a website, trading bot, or mentorship? I'm available for hire!
+  </p>
+  
+  {/* Big Buttons */}
+  <div className="flex flex-wrap justify-center gap-5">
+    <Link 
+      to="/hire-me" 
+      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-10 py-4 rounded-xl text-xl font-bold transition transform hover:scale-105 shadow-lg"
+    >
+      💼 Hire Me
+    </Link>
+    <Link 
+      to="/community" 
+      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-10 py-4 rounded-xl text-xl font-bold transition transform hover:scale-105 shadow-lg"
+    >
+      👥 Join Community
+    </Link>
+    <Link 
+      to="/mentorship" 
+      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-10 py-4 rounded-xl text-xl font-bold transition transform hover:scale-105 shadow-lg"
+    >
+      🎓 Get Mentorship
+    </Link>
+  </div>
+</div>
     </div>
   )
 }
