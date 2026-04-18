@@ -4,10 +4,38 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>btcguylegacy</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1e293b" />
+    <meta name="description" content="Generas Kagiraneza - Full-Stack Developer, Crypto & Forex Trader, Entrepreneur. Tracking my journey from Nursery School to Infinity." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Generas Legacy" />
+    
+    <link rel="manifest" href="/manifest.json" />
+    
+    <title>Generas Kagiraneza | Full-Stack Developer & Trader</title>
+    
+    <!-- Inline critical CSS for fastest render -->
+    <style>
+      /* Prevent FOUC */
+      html { background-color: #0f172a; }
+      body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #fff; }
+      #root { min-height: 100vh; }
+      /* Loading state */
+      .loading { display: flex; align-items: center; justify-content: center; height: 100vh; }
+      .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback loading state -->
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

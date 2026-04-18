@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaUpload } from 'react-icons/fa'
+import { usdToRwf } from '../../utils/currency'
 
 export default function TradingManager() {
   const [trades, setTrades] = useState([])  // ← Start with empty array, not null
@@ -383,11 +384,11 @@ export default function TradingManager() {
                     <span className="text-xs text-gray-500">{new Date(trade.trade_date).toLocaleDateString()}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>Entry: ${trade.entry_price?.toFixed(2)}</div>
-                    <div>Exit: ${trade.exit_price?.toFixed(2)}</div>
+                    <div>Entry: ${trade.entry_price?.toFixed(2)} ({usdToRwf(trade.entry_price).toLocaleString()} RWF)</div>
+                    <div>Exit: ${trade.exit_price?.toFixed(2)} ({usdToRwf(trade.exit_price).toLocaleString()} RWF)</div>
                     <div>Qty: {trade.quantity}</div>
                     <div className={trade.profit_loss >= 0 ? 'text-green-500' : 'text-red-500'}>
-                      P&L: ${trade.profit_loss?.toFixed(2)}
+                      P&L: ${trade.profit_loss?.toFixed(2)} ({usdToRwf(trade.profit_loss).toLocaleString()} RWF)
                     </div>
                     {trade.strategy && <div>Strategy: {trade.strategy}</div>}
                   </div>

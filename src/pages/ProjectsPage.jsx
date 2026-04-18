@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+
+// Force scroll to top on mount
+const useScrollToTop = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+  }, [])
+}
+
 import { 
   FaGithub, FaExternalLinkAlt, FaCode, FaEye, FaCalendar, 
   FaReact, FaNodeJs, FaDatabase, FaCss3Alt, FaHtml5,
@@ -85,6 +95,8 @@ const getTechColor = (tech) => {
 }
 
 export default function ProjectsPage() {
+  useScrollToTop() // Force scroll to top on page load
+
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('all')

@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { FaGraduationCap, FaCode, FaChartLine, FaCoffee, FaUsers, FaCalendar, FaArrowRight } from 'react-icons/fa'
+import { GraduationCap, Code, TrendingUp, Coffee, Users, Calendar, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import SkillsMatrix from '../components/skills/SkillsMatrix'  // ← ADD THIS IMPORT
+import SkillsMatrix from '../components/skills/SkillsMatrix'
+import LivingHero from '../components/hero/LivingHero'
+import BlogsSection from '../components/blogs/BlogsSection'
+import ContactForm from '../components/contact/ContactForm'
 
 export default function HomePage() {
   const [stats, setStats] = useState({
@@ -26,7 +29,7 @@ export default function HomePage() {
         supabase.from('projects').select('*', { count: 'exact', head: true }),
         supabase.from('trades').select('*', { count: 'exact', head: true }),
         supabase.from('coffee_supporters').select('*', { count: 'exact', head: true }),
-        supabase.from('followers').select('*', { count: 'exact', head: true })
+        supabase.from('followers').select('*', { count: 'exact', head: true }),
       ])
 
       setStats({
@@ -45,12 +48,12 @@ export default function HomePage() {
   }
 
   const statCards = [
-    { value: stats.academic_levels, label: 'Academic Levels', icon: FaGraduationCap, color: 'text-blue-500', desc: 'From Nursery to PhD' },
-    { value: stats.projects, label: 'Projects Built', icon: FaCode, color: 'text-green-500', desc: 'Web, Mobile, Blockchain' },
-    { value: stats.trades, label: 'Trades Logged', icon: FaChartLine, color: 'text-purple-500', desc: 'Binance, MT4, MT5' },
-    { value: stats.supporters, label: 'Supporters', icon: FaCoffee, color: 'text-amber-500', desc: 'Coffee buyers' },
-    { value: stats.followers, label: 'Followers', icon: FaUsers, color: 'text-cyan-500', desc: 'Newsletter subscribers' },
-    { value: stats.days_active + '+', label: 'Days Active', icon: FaCalendar, color: 'text-white', desc: 'Building legacy' }
+    { value: stats.academic_levels, label: 'Academic Levels', icon: GraduationCap, color: 'text-blue-500', desc: 'From Nursery to PhD' },
+    { value: stats.projects, label: 'Projects Built', icon: Code, color: 'text-green-500', desc: 'Web, Mobile, Blockchain' },
+    { value: stats.trades, label: 'Trades Logged', icon: TrendingUp, color: 'text-purple-500', desc: 'Binance, MT4, MT5' },
+    { value: stats.supporters, label: 'Supporters', icon: Coffee, color: 'text-amber-500', desc: 'Coffee buyers' },
+    { value: stats.followers, label: 'Followers', icon: Users, color: 'text-cyan-500', desc: 'Newsletter subscribers' },
+    { value: stats.days_active + '+', label: 'Days Active', icon: Calendar, color: 'text-white', desc: 'Building legacy' }
   ]
 
   if (loading) {
@@ -63,28 +66,8 @@ export default function HomePage() {
 
   return (
     <div className="space-y-12">
-      {/* Hero Section */}
-      <div className="text-center">
-        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-          Kagiraneza Generas
-        </h1>
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-         FullStack Developer | Crypto& Forex Trader | Entrepreneur
-        </p>
-        <p className="text-lg text-gray-500 mt-2">
-          Tracking my journey from Nursery School to Infinity
-        </p>
-        
-        {/* CTA Buttons */}
-        <div className="flex flex-wrap justify-center gap-4 mt-8">
-          <Link to="/academic" className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg flex items-center gap-2 transition">
-            Explore My Journey <FaArrowRight />
-          </Link>
-          <button className="bg-amber-600 hover:bg-amber-700 px-6 py-3 rounded-lg flex items-center gap-2 transition">
-            Support Me <FaCoffee />
-          </button>
-        </div>
-      </div>
+      {/* Living Hero Section */}
+      <LivingHero />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -92,7 +75,7 @@ export default function HomePage() {
           const Icon = card.icon
           return (
             <div key={index} className="bg-slate-800/30 rounded-xl p-4 text-center hover:bg-slate-800/50 transition border border-slate-700/50">
-              <Icon className={`text-2xl mx-auto mb-2 ${card.color}`} />
+              <Icon className={`w-6 h-6 mx-auto mb-2 ${card.color}`} />
               <div className={`text-2xl font-bold ${card.color}`}>{card.value}</div>
               <div className="text-xs text-gray-400 mt-1">{card.label}</div>
               <div className="text-[10px] text-gray-500 mt-0.5">{card.desc}</div>
@@ -111,7 +94,7 @@ export default function HomePage() {
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 rounded-xl p-6 border border-slate-700">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <FaGraduationCap />
+              <GraduationCap className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-2xl font-bold">Academic Journey</h2>
           </div>
@@ -127,7 +110,7 @@ export default function HomePage() {
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 rounded-xl p-6 border border-slate-700">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-              <FaCode />
+              <Code className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-2xl font-bold">Project Portfolio</h2>
           </div>
@@ -143,7 +126,7 @@ export default function HomePage() {
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 rounded-xl p-6 border border-slate-700">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
-              <FaChartLine />
+              <TrendingUp className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-2xl font-bold">Trading Dashboard</h2>
           </div>
@@ -159,7 +142,7 @@ export default function HomePage() {
         <div className="bg-gradient-to-br from-slate-800/50 to-slate-800/30 rounded-xl p-6 border border-slate-700">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-amber-600 rounded-lg flex items-center justify-center">
-              <FaUsers />
+              <Users className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-2xl font-bold">Community</h2>
           </div>
@@ -173,37 +156,23 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Database Status */}
-     <div className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-xl p-8 text-center border border-amber-500/30 my-8">
-  <h3 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-    Let's Work Together
-  </h3>
-  <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-    Need a website, trading bot, or mentorship? I'm available for hire!
-  </p>
-  
-  {/* Big Buttons */}
-  <div className="flex flex-wrap justify-center gap-5">
-    <Link 
-      to="/hire-me" 
-      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 px-10 py-4 rounded-xl text-xl font-bold transition transform hover:scale-105 shadow-lg"
-    >
-      💼 Hire Me
-    </Link>
-    <Link 
-      to="/community" 
-      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 px-10 py-4 rounded-xl text-xl font-bold transition transform hover:scale-105 shadow-lg"
-    >
-      👥 Join Community
-    </Link>
-    <Link 
-      to="/mentorship" 
-      className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-10 py-4 rounded-xl text-xl font-bold transition transform hover:scale-105 shadow-lg"
-    >
-      🎓 Get Mentorship
-    </Link>
-  </div>
-</div>
+      {/* Latest Blogs Section */}
+      <BlogsSection />
+
+      {/* Contact Form Section */}
+      <ContactForm />
+
+      {/* Small WhatsApp Button */}
+      <div className="flex justify-center mt-8">
+        <a
+          href="https://wa.me/0794144738?text=Hello! I visited your website and would like to connect."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2 bg-green-600/20 hover:bg-green-600/30 text-green-400 rounded-full text-sm transition border border-green-600/30"
+        >
+          <span>WhatsApp</span>
+        </a>
+      </div>
     </div>
   )
 }

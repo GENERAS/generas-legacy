@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { FaCode, FaChartLine, FaBriefcase } from 'react-icons/fa'
+import { Code, TrendingUp, Briefcase } from 'lucide-react'
 
 export default function SkillsMatrix() {
   const [skills, setSkills] = useState([])
@@ -27,9 +27,9 @@ export default function SkillsMatrix() {
   }
 
   const categories = [
-    { id: 'development', label: 'Development', icon: FaCode, color: 'text-blue-500' },
-    { id: 'trading', label: 'Trading', icon: FaChartLine, color: 'text-green-500' },
-    { id: 'entrepreneurial', label: 'Entrepreneurial', icon: FaBriefcase, color: 'text-purple-500' }
+    { id: 'development', label: 'Development', icon: Code, color: 'text-blue-500' },
+    { id: 'trading', label: 'Trading', icon: TrendingUp, color: 'text-green-500' },
+    { id: 'entrepreneurial', label: 'Entrepreneurial', icon: Briefcase, color: 'text-purple-500' }
   ]
 
   const filteredSkills = skills.filter(skill => skill.category === activeCategory)

@@ -3,11 +3,12 @@ import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { 
   FaChartLine, FaGraduationCap, FaBrain, FaCode, FaChartLine as FaTrading, 
-  FaCoffee, FaNewspaper, FaVideo, FaImages, FaCrown, FaUsers, FaEnvelope, 
-  FaShareAlt, FaComments, FaCog, FaAward 
+  FaCoffee, FaNewspaper, FaVideo, FaImages, FaCrown, FaUsers, 
+  FaComments, FaCog, FaAward, FaUser, FaBriefcase, FaStar, FaFileAlt  
 } from 'react-icons/fa'
 import AdminDashboard from '../components/admin/AdminDashboard'
 import AcademicManager from '../components/admin/AcademicManager'
+import AcademicReportsManager from '../components/admin/AcademicReportsManager'
 import ProjectsManager from '../components/admin/ProjectsManager'
 import TradingManager from '../components/admin/TradingManager'
 import SkillsManager from '../components/admin/SkillsManager'
@@ -19,6 +20,10 @@ import CoffeeManager from '../components/admin/CoffeeManager'
 import FollowerManager from '../components/admin/FollowerManager'
 import CommentModerator from '../components/admin/CommentModerator'
 import CertificatesManager from '../components/admin/CertificatesManager'
+import MentorshipManager from '../components/admin/MentorshipManager'
+import ProjectInquiriesManager from '../components/admin/ProjectInquiriesManager'
+import TestimonialsManager from '../components/admin/TestimonialsManager'
+import NotificationCenter from '../components/admin/NotificationCenter'
 
 export default function AdminPage() {
   const { user, profile, isAdmin, loading } = useAuth()
@@ -42,6 +47,7 @@ export default function AdminPage() {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: FaChartLine },
     { id: 'academic', label: 'Academic', icon: FaGraduationCap },
+    { id: 'academic-reports', label: 'School Reports', icon: FaFileAlt },
     { id: 'skills', label: 'Skills', icon: FaBrain },
     { id: 'projects', label: 'Projects', icon: FaCode },
     { id: 'trading', label: 'Trading', icon: FaTrading },
@@ -54,11 +60,17 @@ export default function AdminPage() {
     { id: 'comments', label: 'Comments', icon: FaComments },
     { id: 'settings', label: 'Settings', icon: FaCog },
     { id: 'certificates', label: 'Certificates', icon: FaAward },
+    { id: 'mentorship', label: 'Mentorship Apps', icon: FaUser },
+    { id: 'inquiries', label: 'Project Inquiries', icon: FaBriefcase },
+    { id: 'testimonials', label: 'Testimonials', icon: FaStar },
   ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6">
-      <h1 className="text-3xl font-bold mb-8">Admin Control Center</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Admin Control Center</h1>
+        <NotificationCenter />
+      </div>
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 mb-8 pb-2 border-b border-slate-700">
@@ -82,6 +94,7 @@ export default function AdminPage() {
       <div className="bg-slate-800/30 rounded-xl p-6">
         {activeTab === 'dashboard' && <AdminDashboard />}
         {activeTab === 'academic' && <AcademicManager />}
+        {activeTab === 'academic-reports' && <AcademicReportsManager />}
         {activeTab === 'skills' && <SkillsManager />}
         {activeTab === 'projects' && <ProjectsManager />}
         {activeTab === 'trading' && <TradingManager />}
@@ -94,6 +107,9 @@ export default function AdminPage() {
         {activeTab === 'comments' && <CommentModerator />}
         {activeTab === 'settings' && <div className="text-center py-12 text-gray-400">Settings coming soon</div>}
         {activeTab === 'certificates' && <CertificatesManager />}
+        {activeTab === 'mentorship' && <MentorshipManager />}
+        {activeTab === 'inquiries' && <ProjectInquiriesManager />}
+        {activeTab === 'testimonials' && <TestimonialsManager />}
       </div>
     </div>
   )

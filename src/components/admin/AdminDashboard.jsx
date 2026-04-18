@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { FaUsers, FaCoffee, FaComment, FaNewspaper, FaVideo, FaImages, FaChartLine } from 'react-icons/fa'
+import { Users, Coffee, MessageSquare, Newspaper, Video, Image, TrendingUp } from 'lucide-react'
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -73,43 +73,44 @@ export default function AdminDashboard() {
           onClick={handleRefresh}
           className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm flex items-center gap-2"
         >
-          🔄 Refresh
+          <Coffee className="w-4 h-4 text-white mx-auto mb-2" />
+          Refresh
         </button>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-slate-800/50 rounded-xl p-4 text-center">
-          <FaCoffee className="text-2xl text-amber-500 mx-auto mb-2" />
+          <Coffee className="w-6 h-6 text-amber-500 mx-auto mb-2" />
           <div className="text-2xl font-bold">{stats.supporters}</div>
           <div className="text-xs text-gray-400">Supporters</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-4 text-center">
-          <FaComment className="text-2xl text-blue-500 mx-auto mb-2" />
+          <MessageSquare className="w-6 h-6 text-blue-500 mx-auto mb-2" />
           <div className="text-2xl font-bold">{stats.comments}</div>
           <div className="text-xs text-gray-400">Total Comments</div>
           {stats.pendingComments > 0 && <div className="text-xs text-amber-500">{stats.pendingComments} pending approval</div>}
         </div>
         <div className="bg-slate-800/50 rounded-xl p-4 text-center">
-          <FaNewspaper className="text-2xl text-green-500 mx-auto mb-2" />
+          <Newspaper className="w-6 h-6 text-green-500 mx-auto mb-2" />
           <div className="text-2xl font-bold">{stats.blogs}</div>
           <div className="text-xs text-gray-400">Blog Posts</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-4 text-center">
-          <FaVideo className="text-2xl text-red-500 mx-auto mb-2" />
+          <Video className="w-6 h-6 text-red-500 mx-auto mb-2" />
           <div className="text-2xl font-bold">{stats.videos}</div>
           <div className="text-xs text-gray-400">Videos</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-4 text-center">
-          <FaImages className="text-2xl text-purple-500 mx-auto mb-2" />
+          <Image className="w-6 h-6 text-purple-500 mx-auto mb-2" />
           <div className="text-2xl font-bold">{stats.photos}</div>
           <div className="text-xs text-gray-400">Photos</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-4 text-center">
-          <FaUsers className="text-2xl text-cyan-500 mx-auto mb-2" />
+          <Users className="w-6 h-6 text-cyan-500 mx-auto mb-2" />
           <div className="text-2xl font-bold">{stats.mentorshipApps}</div>
           <div className="text-xs text-gray-400">Mentorship Apps</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-4 text-center">
-          <FaChartLine className="text-2xl text-orange-500 mx-auto mb-2" />
+          <TrendingUp className="w-6 h-6 text-orange-500 mx-auto mb-2" />
           <div className="text-2xl font-bold">{stats.projectInquiries}</div>
           <div className="text-xs text-gray-400">Project Inquiries</div>
         </div>

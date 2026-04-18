@@ -1,13 +1,14 @@
-import React from 'react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState, lazy, Suspense } from 'react'
 import { supabase } from '../lib/supabase'
 import { 
-  FaChartLine, FaCalendar, FaDollarSign, FaPercentage, 
-  FaEye, FaDownload, FaChevronDown, FaChevronUp, 
-  FaTrophy, FaSkull, FaInfoCircle 
-} from 'react-icons/fa'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+  TrendingUp, Calendar, DollarSign, Percent, 
+  Eye, Download, ChevronDown, ChevronUp, 
+  Trophy, Skull, Info
+} from 'lucide-react'
 import CommentsSection from '../components/comments/CommentsSection'
+
+// Lazy load heavy recharts only when needed
+const MonthlyPnLChart = lazy(() => import('../components/trading/MonthlyPnLChart'))
 
 export default function TradingPage() {
   const [trades, setTrades] = useState([])
@@ -128,7 +129,7 @@ export default function TradingPage() {
       {/* Stats Cards - Enhanced */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-slate-800/80 to-slate-800/40 rounded-xl p-4 text-center border border-slate-700">
-          <FaDollarSign className="text-2xl mx-auto mb-2 text-green-500" />
+          <DollarSign className="w-6 h-6 mx-auto mb-2 text-green-500" />
           <div className={`text-2xl font-bold ${stats.totalPnL >= 0 ? 'text-green-500' : 'text-red-500'}`}>
             {formatCurrency(stats.totalPnL)}
           </div>
@@ -136,21 +137,21 @@ export default function TradingPage() {
         </div>
         
         <div className="bg-gradient-to-br from-slate-800/80 to-slate-800/40 rounded-xl p-4 text-center border border-slate-700">
-          <FaPercentage className="text-2xl mx-auto mb-2 text-blue-500" />
+          <Percent className="w-6 h-6 mx-auto mb-2 text-blue-500" />
           <div className="text-2xl font-bold text-blue-500">{stats.winRate}%</div>
           <div className="text-xs text-gray-400">Win Rate</div>
           <div className="text-xs text-gray-500 mt-1">{stats.winningTrades}W / {stats.losingTrades}L</div>
         </div>
         
         <div className="bg-gradient-to-br from-slate-800/80 to-slate-800/40 rounded-xl p-4 text-center border border-slate-700">
-          <FaTrophy className="text-2xl mx-auto mb-2 text-amber-500" />
+          <Trophy className="w-6 h-6 mx-auto mb-2 text-amber-500" />
           <div className="text-lg font-bold text-amber-500">{formatCurrency(stats.bestTrade)}</div>
           <div className="text-xs text-gray-400">Best Trade</div>
           <div className="text-xs text-gray-500 mt-1">Avg Win: {formatCurrency(stats.avgWin)}</div>
         </div>
         
         <div className="bg-gradient-to-br from-slate-800/80 to-slate-800/40 rounded-xl p-4 text-center border border-slate-700">
-          <FaSkull className="text-2xl mx-auto mb-2 text-red-500" />
+          <Skull className="w-6 h-6 mx-auto mb-2 text-red-500" />
           <div className="text-lg font-bold text-red-500">{formatCurrency(Math.abs(stats.worstTrade))}</div>
           <div className="text-xs text-gray-400">Worst Loss</div>
           <div className="text-xs text-gray-500 mt-1">Avg Loss: {formatCurrency(stats.avgLoss)}</div>
@@ -168,23 +169,13 @@ export default function TradingPage() {
       {chartData.length > 0 && (
         <div className="bg-slate-800/50 rounded-xl p-6">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <FaChartLine className="text-blue-500" />
+            <TrendingUp className="w-5 h-5 text-blue-500" />
             Monthly P&L
           </h2>
           <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                <XAxis dataKey="month" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" tickFormatter={(value) => `$${value}`} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
-                  formatter={(value) => [`${formatCurrency(value)}`, 'P&L']}
-                  labelFormatter={(label) => `Month: ${label}`}
-                />
-                <Bar dataKey="pnl" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<div className="h-full flex items-center justify-center text-gray-400">Loading chart...</div>}>
+              <MonthlyPnLChart data={chartData} formatCurrency={formatCurrency} />
+            </Suspense>
           </div>
         </div>
       )}
@@ -238,9 +229,9 @@ export default function TradingPage() {
                     </td>
                     <td className="px-4 py-3 text-center">
                       {expandedTrade === trade.id ? (
-                        <FaChevronUp className="inline text-blue-400" />
+                        <ChevronUp className="inline w-4 h-4 text-blue-400" />
                       ) : (
-                        <FaChevronDown className="inline text-gray-500 hover:text-white" />
+                        <ChevronDown className="inline w-4 h-4 text-gray-500 hover:text-white" />
                       )}
                     </td>
                   </tr>
@@ -261,7 +252,7 @@ export default function TradingPage() {
         
         {trades.length === 0 && (
           <div className="text-center py-12 text-gray-400">
-            <FaChartLine className="text-4xl mx-auto mb-3 opacity-50" />
+            <TrendingUp className="w-10 h-10 mx-auto mb-3 opacity-50" />
             <p>No trades yet. Add your first trade in the admin panel!</p>
           </div>
         )}

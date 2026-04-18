@@ -1,45 +1,49 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { FaFilePdf, FaAward, FaImages, FaBook, FaCalendar, FaSchool, FaDownload, FaLock, FaLink, FaTimes } from 'react-icons/fa'
+import { 
+  FaFilePdf, FaAward, FaImages, FaBook, FaCalendar, FaSchool, 
+  FaDownload, FaLock, FaLink, FaTimes, FaEye, FaUserTie, FaFileAlt 
+} from 'react-icons/fa'
 import LikeButton from '../components/likes/LikeButton'
 import CommentsSection from '../components/comments/CommentsSection'
 
 export default function AcademicPage() {
   const [levels, setLevels] = useState([])
   const [documents, setDocuments] = useState({})
+  const [reports, setReports] = useState({})
   const [certificates, setCertificates] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedDocs, setSelectedDocs] = useState(null)
-  const [showModal, setShowModal] = useState(false)
-  const [selectedCert, setSelectedCert] = useState(null) // For lightbox
+  const [showDocModal, setShowDocModal] = useState(false)
+  const [selectedCert, setSelectedCert] = useState(null)
+  
+  // Level detail modal state
+  const [selectedLevel, setSelectedLevel] = useState(null)
+  const [showLevelModal, setShowLevelModal] = useState(false)
+  const [viewingFile, setViewingFile] = useState(null)
 
   useEffect(() => {
     loadAcademicData()
     loadCertificates()
     
-    // Set up real-time subscriptions for academic content
+    // Set up real-time subscriptions
     const channel = supabase
       .channel('academic-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'academic_levels' },
-        (payload) => {
-          console.log('Academic levels changed:', payload)
-          loadAcademicData()
-        }
+        () => loadAcademicData()
       )
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'academic_documents' },
-        (payload) => {
-          console.log('Academic documents changed:', payload)
-          loadAcademicData()
-        }
+        () => loadAcademicData()
+      )
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'academic_level_reports' },
+        () => loadAcademicData()
       )
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'certificates' },
-        (payload) => {
-          console.log('Certificates changed:', payload)
-          loadCertificates()
-        }
+        () => loadCertificates()
       )
       .subscribe()
 
@@ -61,15 +65,27 @@ export default function AcademicPage() {
         
         // Load documents for each level
         const docsMap = {}
+        const reportsMap = {}
+        
         for (const level of levelsData) {
+          // Load academic_documents
           const { data: docsData } = await supabase
             .from('academic_documents')
             .select('*')
             .eq('level_id', level.id)
-          
           docsMap[level.id] = docsData || []
+          
+          // Load academic_level_reports
+          const { data: reportsData } = await supabase
+            .from('academic_level_reports')
+            .select('*')
+            .eq('level_id', level.id)
+            .order('display_order')
+          reportsMap[level.id] = reportsData || []
         }
+        
         setDocuments(docsMap)
+        setReports(reportsMap)
       }
     } catch (error) {
       console.error('Error loading academic data:', error)
@@ -119,9 +135,46 @@ export default function AcademicPage() {
     }
   }
 
+  const getLevelReportCounts = (levelId) => {
+    const levelReports = reports[levelId] || []
+    return {
+      schoolReports: levelReports.filter(r => r.report_type === 'school_report').length,
+      uniformPhotos: levelReports.filter(r => r.report_type === 'uniform_photo').length,
+      schoolPhotos: levelReports.filter(r => r.report_type === 'school_photo').length,
+      total: levelReports.length
+    }
+  }
+
   const openDocumentViewer = (docs, type) => {
     setSelectedDocs({ docs, type })
-    setShowModal(true)
+    setShowDocModal(true)
+  }
+
+  const openLevelModal = (level) => {
+    setSelectedLevel(level)
+    setShowLevelModal(true)
+  }
+
+  const getReportTypeIcon = (type) => {
+    switch (type) {
+      case 'school_report': return <FaFileAlt className="text-red-400" />
+      case 'uniform_photo': return <FaUserTie className="text-blue-400" />
+      case 'school_photo': return <FaImages className="text-green-400" />
+      default: return <FaFileAlt className="text-gray-400" />
+    }
+  }
+
+  const getReportTypeLabel = (type) => {
+    switch (type) {
+      case 'school_report': return 'School Report'
+      case 'uniform_photo': return 'Uniform Photo'
+      case 'school_photo': return 'School Photo'
+      default: return type.replace('_', ' ')
+    }
+  }
+
+  const viewFile = (report) => {
+    setViewingFile(report)
   }
 
   if (loading) {
@@ -150,17 +203,21 @@ export default function AcademicPage() {
         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-blue-600"></div>
 
         {levels.map((level) => {
-          const counts = getDocumentCounts(level.id)
+          const docCounts = getDocumentCounts(level.id)
+          const reportCounts = getLevelReportCounts(level.id)
           
           return (
             <div key={level.id} className="relative mb-12">
               {/* Timeline dot */}
               <div className="absolute -left-8 top-2 w-4 h-4 rounded-full bg-amber-500 border-4 border-slate-900"></div>
               
-              <div className="bg-slate-800/50 rounded-xl p-6 ml-4 border border-slate-700">
-                <div className="flex flex-wrap justify-between items-start mb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold flex items-center flex-wrap">
+              <div className="bg-slate-800/50 rounded-xl p-6 ml-4 border border-slate-700 hover:border-slate-600 transition">
+                <div 
+                  className="flex flex-wrap justify-between items-start mb-4 cursor-pointer"
+                  onClick={() => openLevelModal(level)}
+                >
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold flex items-center flex-wrap hover:text-blue-400 transition">
                       {level.level_name}
                       {getStatusBadge(level.status)}
                     </h2>
@@ -172,55 +229,76 @@ export default function AcademicPage() {
                       <span>{level.start_year} - {level.end_year}</span>
                     </div>
                   </div>
+                  <button className="text-blue-400 hover:text-blue-300 flex items-center gap-1 text-sm mt-2 md:mt-0">
+                    <FaEye /> View Details
+                  </button>
                 </div>
 
                 {level.description && (
                   <p className="text-gray-300 mb-4">{level.description}</p>
                 )}
 
-                {/* Document counters - CLICKABLE */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                  {counts.reports > 0 && (
+                {/* Combined Document & Report counters */}
+                <div className="flex flex-wrap gap-2">
+                  {/* Legacy document counters */}
+                  {docCounts.reports > 0 && (
                     <button
                       onClick={() => openDocumentViewer(documents[level.id]?.filter(d => d.document_type === 'report'), 'Reports')}
-                      className="bg-slate-700/50 rounded-lg p-3 text-center hover:bg-slate-700 transition"
+                      className="bg-slate-700/50 rounded-lg px-3 py-2 text-center hover:bg-slate-700 transition flex items-center gap-2"
                     >
-                      <FaFilePdf className="text-red-400 text-xl mx-auto mb-1" />
-                      <div className="text-sm font-semibold">{counts.reports} Reports</div>
-                      <div className="text-xs text-gray-400">Click to view</div>
+                      <FaFilePdf className="text-red-400" />
+                      <span className="text-sm">{docCounts.reports} Reports</span>
                     </button>
                   )}
                   
-                  {counts.certificates > 0 && (
+                  {docCounts.certificates > 0 && (
                     <button
                       onClick={() => openDocumentViewer(documents[level.id]?.filter(d => d.document_type === 'certificate'), 'Certificates')}
-                      className="bg-slate-700/50 rounded-lg p-3 text-center hover:bg-slate-700 transition"
+                      className="bg-slate-700/50 rounded-lg px-3 py-2 text-center hover:bg-slate-700 transition flex items-center gap-2"
                     >
-                      <FaAward className="text-amber-400 text-xl mx-auto mb-1" />
-                      <div className="text-sm font-semibold">{counts.certificates} Certificates</div>
-                      <div className="text-xs text-gray-400">Click to view</div>
+                      <FaAward className="text-amber-400" />
+                      <span className="text-sm">{docCounts.certificates} Certs</span>
+                    </button>
+                  )}
+
+                  {/* New report/photo counters */}
+                  {reportCounts.schoolReports > 0 && (
+                    <button
+                      onClick={() => openLevelModal(level)}
+                      className="bg-slate-700/50 rounded-lg px-3 py-2 text-center hover:bg-slate-700 transition flex items-center gap-2"
+                    >
+                      <FaFileAlt className="text-red-400" />
+                      <span className="text-sm">{reportCounts.schoolReports} School Reports</span>
                     </button>
                   )}
                   
-                  {counts.photos > 0 && (
+                  {reportCounts.uniformPhotos > 0 && (
                     <button
-                      onClick={() => openDocumentViewer(documents[level.id]?.filter(d => d.document_type === 'photo'), 'Photos')}
-                      className="bg-slate-700/50 rounded-lg p-3 text-center hover:bg-slate-700 transition"
+                      onClick={() => openLevelModal(level)}
+                      className="bg-slate-700/50 rounded-lg px-3 py-2 text-center hover:bg-slate-700 transition flex items-center gap-2"
                     >
-                      <FaImages className="text-green-400 text-xl mx-auto mb-1" />
-                      <div className="text-sm font-semibold">{counts.photos} Photos</div>
-                      <div className="text-xs text-gray-400">Click to view</div>
+                      <FaUserTie className="text-blue-400" />
+                      <span className="text-sm">{reportCounts.uniformPhotos} Uniform Photos</span>
                     </button>
                   )}
                   
-                  {counts.books > 0 && (
+                  {reportCounts.schoolPhotos > 0 && (
                     <button
-                      onClick={() => openDocumentViewer(documents[level.id]?.filter(d => d.document_type === 'book'), 'Books')}
-                      className="bg-slate-700/50 rounded-lg p-3 text-center hover:bg-slate-700 transition"
+                      onClick={() => openLevelModal(level)}
+                      className="bg-slate-700/50 rounded-lg px-3 py-2 text-center hover:bg-slate-700 transition flex items-center gap-2"
                     >
-                      <FaBook className="text-blue-400 text-xl mx-auto mb-1" />
-                      <div className="text-sm font-semibold">{counts.books} Books</div>
-                      <div className="text-xs text-gray-400">Click to view</div>
+                      <FaImages className="text-green-400" />
+                      <span className="text-sm">{reportCounts.schoolPhotos} School Photos</span>
+                    </button>
+                  )}
+                  
+                  {reportCounts.total > 0 && (
+                    <button
+                      onClick={() => openLevelModal(level)}
+                      className="bg-blue-600/30 hover:bg-blue-600/50 rounded-lg px-3 py-2 text-center transition flex items-center gap-2"
+                    >
+                      <FaEye className="text-blue-400" />
+                      <span className="text-sm">View All ({reportCounts.total})</span>
                     </button>
                   )}
                 </div>
@@ -230,7 +308,7 @@ export default function AcademicPage() {
         })}
       </div>
 
-      {/* Certificates Section with Lightbox and Comments */}
+      {/* Certificates Section */}
       {certificates.length > 0 && (
         <div className="mt-12">
           <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
@@ -249,11 +327,6 @@ export default function AcademicPage() {
                         📅 Issued: {new Date(cert.issue_date).toLocaleDateString()}
                       </p>
                     )}
-                    {cert.credential_id && (
-                      <p className="text-xs text-gray-500">
-                        🔑 ID: {cert.credential_id}
-                      </p>
-                    )}
                     <div className="flex gap-3 mt-3">
                       {cert.certificate_url && (
                         <a
@@ -266,23 +339,10 @@ export default function AcademicPage() {
                           View Certificate →
                         </a>
                       )}
-                      {cert.verification_url && (
-                        <a
-                          href={cert.verification_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-green-400 hover:text-green-300 text-sm flex items-center gap-1"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <FaLink /> Verify
-                        </a>
-                      )}
                     </div>
                   </div>
                   <LikeButton contentType="certificate" contentId={cert.id} initialLikes={cert.likes || 0} />
                 </div>
-                
-                {/* Comments Section for each certificate */}
                 <div className="mt-4 pt-4 border-t border-slate-700">
                   <CommentsSection contentType="certificate" contentId={cert.id} />
                 </div>
@@ -292,7 +352,276 @@ export default function AcademicPage() {
         </div>
       )}
 
-      {/* Certificate Lightbox Modal */}
+      {/* ====== LEVEL DETAIL MODAL (Two Column Layout) ====== */}
+      {showLevelModal && selectedLevel && (
+        <div 
+          className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowLevelModal(false)}
+        >
+          <div 
+            className="bg-slate-800 rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="sticky top-0 bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center">
+              <div>
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  {selectedLevel.level_name}
+                  {selectedLevel.status === 'completed' && <span className="text-green-400 text-lg">✓</span>}
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  {selectedLevel.school_name} • {selectedLevel.start_year} - {selectedLevel.end_year}
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowLevelModal(false)} 
+                className="text-gray-400 hover:text-white p-2"
+              >
+                <FaTimes size={24} />
+              </button>
+            </div>
+
+            {/* Two Column Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                {/* LEFT COLUMN: Level Info */}
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-lg font-semibold text-blue-400 mb-2 flex items-center gap-2">
+                      <FaSchool /> School Information
+                    </h4>
+                    <div className="bg-slate-700/30 rounded-lg p-4 space-y-2">
+                      <p><span className="text-gray-400">School:</span> {selectedLevel.school_name}</p>
+                      <p><span className="text-gray-400">Period:</span> {selectedLevel.start_year} - {selectedLevel.end_year}</p>
+                      <p><span className="text-gray-400">Status:</span> 
+                        <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
+                          selectedLevel.status === 'completed' ? 'bg-green-900 text-green-300' :
+                          selectedLevel.status === 'building' ? 'bg-amber-900 text-amber-300' :
+                          'bg-blue-900 text-blue-300'
+                        }`}>
+                          {selectedLevel.status}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {selectedLevel.description && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-blue-400 mb-2">Description</h4>
+                      <p className="text-gray-300 leading-relaxed">{selectedLevel.description}</p>
+                    </div>
+                  )}
+
+                  {/* Legacy Documents Summary */}
+                  {(() => {
+                    const docs = documents[selectedLevel.id] || []
+                    const hasDocs = docs.length > 0
+                    if (!hasDocs) return null
+                    
+                    return (
+                      <div>
+                        <h4 className="text-lg font-semibold text-blue-400 mb-2">Documents</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {docs.filter(d => d.document_type === 'report').length > 0 && (
+                            <button
+                              onClick={() => {
+                                setShowLevelModal(false)
+                                openDocumentViewer(docs.filter(d => d.document_type === 'report'), 'Reports')
+                              }}
+                              className="bg-red-600/20 hover:bg-red-600/30 text-red-400 px-3 py-1 rounded-lg text-sm flex items-center gap-1"
+                            >
+                              <FaFilePdf /> {docs.filter(d => d.document_type === 'report').length} Reports
+                            </button>
+                          )}
+                          {docs.filter(d => d.document_type === 'certificate').length > 0 && (
+                            <button
+                              onClick={() => {
+                                setShowLevelModal(false)
+                                openDocumentViewer(docs.filter(d => d.document_type === 'certificate'), 'Certificates')
+                              }}
+                              className="bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 px-3 py-1 rounded-lg text-sm flex items-center gap-1"
+                            >
+                              <FaAward /> {docs.filter(d => d.document_type === 'certificate').length} Certs
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+
+                {/* RIGHT COLUMN: Reports & Photos */}
+                <div>
+                  <h4 className="text-lg font-semibold text-amber-400 mb-4 flex items-center gap-2">
+                    <FaImages /> Reports & Photos
+                  </h4>
+                  
+                  {(() => {
+                    const levelReports = reports[selectedLevel.id] || []
+                    
+                    if (levelReports.length === 0) {
+                      return (
+                        <div className="bg-slate-700/30 rounded-lg p-8 text-center">
+                          <FaImages className="text-gray-500 text-4xl mx-auto mb-3" />
+                          <p className="text-gray-400">No reports or photos available for this level yet.</p>
+                        </div>
+                      )
+                    }
+
+                    return (
+                      <div className="space-y-4">
+                        {/* Summary counts */}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {levelReports.filter(r => r.report_type === 'school_report').length > 0 && (
+                            <span className="bg-red-600/20 text-red-400 px-2 py-1 rounded text-xs">
+                              Reports: {levelReports.filter(r => r.report_type === 'school_report').length}
+                            </span>
+                          )}
+                          {levelReports.filter(r => r.report_type === 'uniform_photo').length > 0 && (
+                            <span className="bg-blue-600/20 text-blue-400 px-2 py-1 rounded text-xs">
+                              Uniform: {levelReports.filter(r => r.report_type === 'uniform_photo').length}
+                            </span>
+                          )}
+                          {levelReports.filter(r => r.report_type === 'school_photo').length > 0 && (
+                            <span className="bg-green-600/20 text-green-400 px-2 py-1 rounded text-xs">
+                              Photos: {levelReports.filter(r => r.report_type === 'school_photo').length}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Reports Grid */}
+                        <div className="grid grid-cols-2 gap-3">
+                          {levelReports.map(report => (
+                            <div 
+                              key={report.id}
+                              onClick={() => viewFile(report)}
+                              className="bg-slate-700/50 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500/50 transition group"
+                            >
+                              {/* Thumbnail or Preview */}
+                              <div className="aspect-square bg-slate-800 relative overflow-hidden">
+                                {report.thumbnail_url ? (
+                                  <img 
+                                    src={report.thumbnail_url} 
+                                    alt={report.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition"
+                                  />
+                                ) : report.file_url?.match(/\.(jpg|jpeg|png|webp|gif)$/i) ? (
+                                  <img 
+                                    src={report.file_url} 
+                                    alt={report.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <span className="text-5xl">{getReportTypeIcon(report.report_type)}</span>
+                                  </div>
+                                )}
+                                
+                                {/* Hover overlay */}
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                  <span className="text-white font-semibold flex items-center gap-2">
+                                    <FaEye /> Click to View
+                                  </span>
+                                </div>
+                                
+                                {/* Type badge */}
+                                <div className="absolute top-2 left-2">
+                                  <span className={`text-xs px-2 py-1 rounded ${
+                                    report.report_type === 'school_report' ? 'bg-red-600/80' :
+                                    report.report_type === 'uniform_photo' ? 'bg-blue-600/80' :
+                                    'bg-green-600/80'
+                                  }`}>
+                                    {getReportTypeLabel(report.report_type)}
+                                  </span>
+                                </div>
+                                
+                                {/* Featured badge */}
+                                {report.is_featured && (
+                                  <div className="absolute top-2 right-2">
+                                    <span className="text-xs bg-amber-500 text-black px-2 py-1 rounded font-bold">
+                                      ⭐ Featured
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Info */}
+                              <div className="p-3">
+                                <h5 className="font-medium text-sm truncate">{report.title}</h5>
+                                {report.academic_year && (
+                                  <p className="text-xs text-gray-400">{report.academic_year}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* File Viewer Modal (for reports/photos) */}
+      {viewingFile && (
+        <div 
+          className="fixed inset-0 bg-black/95 flex items-center justify-center z-[60] p-4"
+          onClick={() => setViewingFile(null)}
+        >
+          <button 
+            onClick={() => setViewingFile(null)}
+            className="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 transition z-10"
+          >
+            <FaTimes />
+          </button>
+          <div 
+            className="max-w-5xl max-h-[90vh] w-full" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {viewingFile.file_url?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+              <img 
+                src={viewingFile.file_url} 
+                alt={viewingFile.title}
+                className="max-w-full max-h-[80vh] object-contain mx-auto rounded-lg"
+              />
+            ) : viewingFile.file_url?.match(/\.pdf$/i) ? (
+              <iframe 
+                src={viewingFile.file_url} 
+                className="w-full h-[80vh] rounded-lg"
+                title={viewingFile.title}
+              />
+            ) : (
+              <div className="bg-slate-800 rounded-lg p-8 text-center">
+                <p className="text-xl mb-4">{getReportTypeIcon(viewingFile.report_type)}</p>
+                <h3 className="text-xl font-bold mb-2">{viewingFile.title}</h3>
+                <a 
+                  href={viewingFile.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded inline-flex items-center gap-2"
+                >
+                  <FaDownload /> Download/View File
+                </a>
+              </div>
+            )}
+            <div className="mt-4 text-center text-white">
+              <h3 className="text-xl font-bold">{viewingFile.title}</h3>
+              <p className="text-gray-400">
+                {getReportTypeLabel(viewingFile.report_type)}
+                {viewingFile.academic_year && ` • ${viewingFile.academic_year}`}
+              </p>
+              {viewingFile.description && (
+                <p className="text-gray-500 mt-2 max-w-xl mx-auto">{viewingFile.description}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Certificate Lightbox */}
       {selectedCert && (
         <div 
           className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4"
@@ -321,24 +650,19 @@ export default function AcademicPage() {
             <div className="mt-4 text-center text-white">
               <h3 className="text-xl font-bold">{selectedCert.title}</h3>
               <p className="text-gray-400">{selectedCert.issuer}</p>
-              {selectedCert.issue_date && (
-                <p className="text-sm text-gray-500 mt-1">
-                  Issued: {new Date(selectedCert.issue_date).toLocaleDateString()}
-                </p>
-              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Document Modal */}
-      {showModal && selectedDocs && (
+      {/* Document Modal (Legacy) */}
+      {showDocModal && selectedDocs && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
             <div className="sticky top-0 bg-slate-800 p-4 border-b border-slate-700 flex justify-between items-center">
               <h3 className="text-xl font-bold">{selectedDocs.type}</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white">
-                ✕
+              <button onClick={() => setShowDocModal(false)} className="text-gray-400 hover:text-white">
+                <FaTimes />
               </button>
             </div>
             <div className="p-4 space-y-3">
@@ -352,7 +676,7 @@ export default function AcademicPage() {
                       <p className="text-xs text-gray-400">{doc.upload_date || 'No date'}</p>
                     </div>
                     <div className="flex gap-2">
-                      {doc.is_premium && <FaLock className="text-amber-500" title="Premium content" />}
+                      {doc.is_premium && <FaLock className="text-amber-500" />}
                       {doc.file_url && (
                         <a
                           href={doc.file_url}
