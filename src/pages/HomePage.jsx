@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { GraduationCap, Code, TrendingUp, Coffee, Users, Calendar, ArrowRight } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import SkillsMatrix from '../components/skills/SkillsMatrix'
 import LivingHero from '../components/hero/LivingHero'
@@ -170,7 +171,7 @@ export default function HomePage() {
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2 bg-green-600/20 hover:bg-green-600/30 text-green-400 rounded-full text-sm transition border border-green-600/30"
         >
-          <span>WhatsApp</span>
+          <FaWhatsapp className="w-4 h-4" /> <span>WhatsApp</span>
         </a>
       </div>
     </div>
